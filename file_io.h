@@ -20,6 +20,9 @@ class FileHandler {
     FileHandler(std::string _path) noexcept : file_path(_path){};
     virtual ~FileHandler(){};
 
+    FileHandler(const FileHandler&) = delete;
+    FileHandler& operator=(const FileHandler&) = delete;
+
     bool isFileExist() const;
 
     bool read(content_t& content) const;
