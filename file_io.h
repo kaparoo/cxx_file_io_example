@@ -20,10 +20,10 @@ class FileHandler {
     FileHandler(std::string _path) noexcept : file_path(_path){};
     virtual ~FileHandler(){};
 
-    inline bool isFileExist() const;
+    bool isFileExist() const;
 
-    inline bool read(content_t& content) const;
-    inline bool save(const content_t& content, const std::string& extension = "") const;
+    bool read(content_t& content) const;
+    bool save(const content_t& content, const std::string& extension = "") const;
 };
 }  // namespace KaparooFileIO
 
