@@ -9,17 +9,26 @@ int main(int argc, char* argv[]) {
         KaparooFileIO::FileHandler handler(static_cast<std::string>(argv[1]));
         std::vector<std::string> content;
 
-        handler.read(content);
-        for (const auto& line : content) {
-            std::cout << line << std::endl;
+        if (handler.read(content)) {
+            for (const auto& line : content)
+                std::cout << line << std::endl;
+            std::cout << "File is loaded!" << std::endl;
+        } else {
+            std::cout << "[ERROR] Empty or Invalid file path!" << std::endl;
+            return EXIT_FAILURE;
         }
-        handler.save(content, ".c");
-
+        if (handler.save(content, "test2.txt", true))
+            std::cout << "File is saved!" << std::endl;
+        else {
+            std::cout << "[ERROR] File is already exist!" << std::endl;
+            return EXIT_FAILURE;
+        }
     } else {
         if (argc == 1)
             std::cout << "[ERROR] Need file name!" << std::endl;
         else  // argc > 2
             std::cout << "[ERROR] Too many arguments!" << std::endl;
+        return EXIT_FAILURE;
     }
 
     return EXIT_SUCCESS;
