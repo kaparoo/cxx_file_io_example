@@ -1,15 +1,28 @@
 #include "file_io.h"
 
 #include <fstream>
+#include <sstream>
 
 namespace KaparooFileIO {
 
+content_t splitLine(const std::string& line, const char delimeter /*=' '*/, bool ignore_empty /*=true*/) {
+    content_t content;
+    std::stringstream stream(line);
+    std::string buffer;
+    while (std::getline(stream, buffer, delimeter)) {
+        if (buffer.empty()) {
+            if (!ignore_empty)
+                content.push_back(buffer);
+        } else {
+            content.push_back(buffer);
+        }
+    }
+    return content;
+}
+
 bool FileHandler::setFilePath(const char _path[]) {
     std::string new_path(static_cast<std::string>(_path));
-    if (new_path.empty())
-        return false;
-    file_path = new_path;
-    return true;
+    return this->setFilePath(new_path);
 }
 
 bool FileHandler::setFilePath(std::string _path) {
@@ -34,17 +47,15 @@ bool FileHandler::isFileExist(std::string _path /*=""*/) const {
 }
 
 // content_t: std::vector<std::string>
-bool FileHandler::read(content_t& content) const {
+content_t FileHandler::read() const {
+    content_t content;
     if ((!isEmptyPath()) && isFileExist()) {
-        content.clear();
         std::ifstream inputFile(file_path);
         std::string buffer;
         while (std::getline(inputFile, buffer))
             content.push_back(buffer);
-
-        return true;
     }
-    return false;
+    return content;
 }
 
 bool FileHandler::save(const content_t& content, std::string save_path, bool overwrite_enable /*=true*/) const {

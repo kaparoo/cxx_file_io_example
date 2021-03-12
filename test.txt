@@ -1,5 +1,6 @@
-hello
-world
-minecraft
-dgist
-111
+hello world
+DGIST KAIST UNIST GIST POSTECH
+        addiu   $2, $0, $1024
+array: .word 3
+sum:    sltiu $1, $2, 1
+        la $4, array2     

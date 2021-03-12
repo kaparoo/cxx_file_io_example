@@ -10,6 +10,8 @@ namespace KaparooFileIO {
 
 typedef std::vector<std::string> content_t;
 
+content_t splitLine(const std::string& line, const char delimter = ' ', bool ignore_empty = true);
+
 class FileHandler {
    protected:
     std::string file_path;
@@ -30,7 +32,7 @@ class FileHandler {
     bool isEmptyPath() const;
     bool isFileExist(std::string _path = "") const;
 
-    bool read(content_t& content) const;
+    content_t read() const;
     bool save(const content_t& content, std::string save_path, bool overwrite_enable = true) const;
 };
 }  // namespace KaparooFileIO
