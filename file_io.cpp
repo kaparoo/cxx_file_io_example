@@ -20,56 +20,58 @@ content_t splitLine(const std::string& line, const char delimeter /*=' '*/, bool
     return content;
 }
 
-bool FileHandler::setFilePath(const char _path[]) {
-    std::string new_path(static_cast<std::string>(_path));
-    return this->setFilePath(new_path);
+std::string changeExtension(std::string file_path /*="file"*/, std::string extension /*="txt"*/) {
+    std::string::size_type dot_pos = file_path.find(".");
+    if (dot_pos != std::string::npos) {
+        return file_path.substr(0, dot_pos) + '.' + extension;
+    }
+    return file_path + '.' + extension;
 }
 
-bool FileHandler::setFilePath(std::string _path) {
-    if (_path.empty())
-        return false;
-    file_path = _path;
-    return true;
-}
-
-std::string FileHandler::getFilePath() const {
-    return file_path;
-}
-
-bool FileHandler::isEmptyPath() const {
-    return file_path.empty();
-}
-
+// FileHandler member functions
 bool FileHandler::isFileExist(std::string _path /*=""*/) const {
     if (_path.empty()) _path = file_path;
     std::ifstream targetFile(_path);
     return (targetFile.is_open()) ? true : false;
 }
 
+bool FileHandler::setFilePath(std::string _path) noexcept {
+    if (_path.empty())
+        return false;
+    this->file_path = _path;
+    return true;
+}
+
 // content_t: std::vector<std::string>
-content_t FileHandler::read() const {
-    content_t content;
-    if ((!isEmptyPath()) && isFileExist()) {
-        std::ifstream inputFile(file_path);
-        std::string buffer;
-        while (std::getline(inputFile, buffer))
-            content.push_back(buffer);
-    }
+content_t* FileHandler::readContent() const {
+    if (!isFileExist())
+        throw FileNotFound(this->file_path);
+
+    content_t* content = new content_t;
+    std::ifstream inputFile(this->file_path);
+    std::string buffer;
+
+    while (std::getline(inputFile, buffer))
+        content->push_back(buffer);
+
+    inputFile.close();
+
+    if (content->empty())
+        throw EmptyFile(this->file_path);
+
     return content;
 }
 
-bool FileHandler::save(const content_t& content, std::string save_path, bool overwrite_enable /*=true*/) const {
+void FileHandler::saveContent(const content_t& content, std::string save_path, bool overwrite_enable /*=true*/) const {
     if (save_path.empty())
-        return false;
+        throw file_save_error_t::EMPTY_PATH;
 
     if (isFileExist(save_path) && !overwrite_enable)
-        return false;
+        throw file_save_error_t::EXIST_FILE;
 
     std::ofstream outputFile(save_path);
-    for (const auto& line : content)
+    for (auto& line : content)
         outputFile << line << '\n';
-
-    return true;
 }
 
 }  // namespace KaparooFileIO
