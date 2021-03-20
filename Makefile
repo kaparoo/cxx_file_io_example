@@ -8,7 +8,7 @@ $(TARGET): $(OBJECTS)
 	$(CC) -std=$(CPPVERSION) $(CPPFLAGS) -o $(TARGET) $(OBJECTS)
 
 main.o: file_io.h main.cpp
-	g++ -c main.cpp
+	$(CC) -std=$(CPPVERSION) $(CPPFLAGS) -c main.cpp
 
 file_io.o: file_io.h file_io.cpp
-	g++ -c file_io.cpp
+	$(CC) -std=$(CPPVERSION) $(CPPFLAGS) -c file_io.cpp

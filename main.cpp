@@ -1,77 +1,52 @@
-#include <cstdlib>
-#include <exception>
 #include <iostream>
+#include <memory>  // std::unique_ptr
 #include <string>
 
 #include "file_io.h"
 
-using namespace KaparooFileIO;
-
-void displayContent(const content_t& content) {
+void displayContent(const KaparooFileIO::content_t& content) {
     std::size_t line_num(0U);
     for (auto& line : content) {
         std::cout << "[LINE: " << line_num << "] " << line << std::endl;
         ++line_num;
     }
+    std::cout << std::endl;
 }
 
-void displayContent(const std::vector<content_t>& splited_content) {
+void displaySplitedContent(const std::vector<KaparooFileIO::content_t>& splited_content) {
     std::size_t line_num(0U);
     for (auto& line : splited_content) {
-        std::cout << "[LINE: " << line_num << "] [";
+        std::cout << "[LINE: " << line_num << "] ";
         for (const auto& word : line)
-            std::cout << word << " ";
-        std::cout << "]" << std::endl;
+            std::cout << "[" << word << "], ";
+        std::cout << std::endl;
         ++line_num;
     }
+    std::cout << std::endl;
 }
 
 int main(int argc, char* argv[]) {
     if (argc == 2) {
-        FileHandler handler(argv[1]);  // handler(static_cast<std::string>(argv[1]));
+        KaparooFileIO::FileHandler handler(argv[1]);  // handler(static_cast<std::string>(argv[1]));
         try {
-            content_t* content(handler.readContent());  // exception: FileNotFound or EmptyFile
+            std::unique_ptr<KaparooFileIO::content_t> content{new KaparooFileIO::content_t};
+            handler.readContent(*content);  // exception: FileNotFound or EmptyFile
 
             displayContent(*content);
 
-            std::vector<content_t> splited_content;
+            std::vector<KaparooFileIO::content_t> splited_content{};
+            KaparooFileIO::content_t splited_line{};
             for (const auto& line : *content) {
-                content_t splited_line(splitLine(line));
+                KaparooFileIO::splitLine(line, splited_line, ',', ' ');  // split by ',', remove ' '
                 splited_content.push_back(splited_line);
             }
 
-            std::cout << std::endl;
+            displaySplitedContent(splited_content);
 
-            displayContent(splited_content);
-
-            std::string save_path(changeExtension(argv[1], "cpp"));
-            try {
-                handler.saveContent(*content, save_path, false);
-            } catch (file_save_error_t file_save_error) {
-                switch (file_save_error) {
-                    case file_save_error_t::EXIST_FILE:
-                        std::cout << "[ERROR] File is already exist!" << std::endl;
-                        std::cout << "Overwrite it? (Y/n)" << std::endl;
-                        char c;
-                        std::cin >> c;
-                        if (c == 'Y' || c == 'y')
-                            handler.saveContent(*content, save_path, true);
-                        return EXIT_SUCCESS;  // break;
-                    case file_save_error_t::EMPTY_PATH:
-                        std::cout << "[ERROR] Need a path to save content!" << std::endl;
-                        break;
-                    default:
-                        break;
-                }
-                return EXIT_FAILURE;
-            }
-        } catch (KaparooFileIO::FileException& e) {
+            const std::string save_path{"save.txt"};
+            handler.saveContent(*content, save_path, true);  // true: overwrite file
+        } catch (KaparooFileIO::FileIOException& e) {
             std::cout << e.what() << std::endl;
-            return EXIT_FAILURE;
-        } catch (std::exception& e) {
-            std::cout << e.what() << std::endl;
-            return EXIT_FAILURE;
-        } catch (...) {
             return EXIT_FAILURE;
         }
     } else {
